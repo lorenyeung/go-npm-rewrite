@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/lorenyeung/go-npm-rewrite/auth"
 	"github.com/lorenyeung/go-npm-rewrite/helpers"
@@ -34,6 +36,7 @@ func main() {
 	for i := range stringFlags {
 		if stringFlags[i] == "" {
 			log.Error(i + " cannot be empty")
+			os.Exit(1)
 		}
 	}
 	scope := "*"
@@ -50,6 +53,19 @@ func main() {
 	}
 
 	for result := range results.Result {
-		fmt.Println(results.Result[result].Name)
+		if results.Result[result].Type == "file" {
+			existingPath := results.Result[result].Repo + "/" + results.Result[result].Path + "/" + results.Result[result].Name
+			paths := strings.Split(existingPath, "/")
+			correctPath := paths[0] + "/" + paths[1] + "/" + paths[2] + "/-/" + results.Result[result].Name
+			data, respCode, _, _ := auth.GetRestAPI("HEAD", true, flags.URLVar+"/artifactory/"+correctPath, flags.UsernameVar, flags.ApikeyVar, "", nil, nil, 0, flags, nil)
+			fmt.Println(string(data), respCode, correctPath)
+			if respCode == 404 {
+				//attempt copy
+				query := "/api/copy/" + existingPath + "?to=/" + correctPath + "&dry=1"
+				fmt.Println(flags.URLVar + "/artifactory" + query)
+				data2, respCode2, _, _ := auth.GetRestAPI("POST", true, flags.URLVar+"/artifactory"+query, flags.UsernameVar, flags.ApikeyVar, "", nil, nil, 0, flags, nil)
+				fmt.Println(string(data2), respCode2)
+			}
+		}
 	}
 }
