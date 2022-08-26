@@ -67,12 +67,7 @@ echo "Looks good?"
                     echo "uploading $BINARY to $URL"
 		    curl -T $BINARY "$URL" -H "Content-type: application/x-binary" -u $GIT_USER:$GIT_TOKEN
                 done
-                TEMPLATE="templates.tar.gz"
-		# rebuilding dist scratch via npm run build
-                npm run build --prefix $SCRIPT_DIR/frontend
-                tar -cvzf $TEMPLATE frontend/dist templates valuestemplates
                 echo $edited
-                curl -T $TEMPLATE "$edited?name=$TEMPLATE&label=$TEMPLATE" -H "Content-Type: application/x-gzip" -u $GIT_USER:$GIT_TOKEN
                 rm release-response.json
                 rm $BINARY_PREFIX-*
                 rm $TEMPLATE
