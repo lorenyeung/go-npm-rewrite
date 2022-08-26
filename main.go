@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/lorenyeung/go-npm-rewrite/auth"
@@ -31,7 +31,7 @@ func main() {
 	flags := helpers.SetFlags()
 	helpers.SetLogger(flags.LogLevelVar)
 
-	stringFlags := map[string]string{"-user": flags.UsernameVar, "-apikey": flags.ApikeyVar, "-url": flags.URLVar}
+	stringFlags := map[string]string{"-user": flags.UsernameVar, "-apikey": flags.ApikeyVar, "-url": flags.URLVar, "-repo": flags.RepoVar}
 
 	for i := range stringFlags {
 		if stringFlags[i] == "" {
@@ -39,8 +39,12 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	scope := "*"
-	repo := "npm"
+	scope := flags.ScopeVar
+	if flags.ScopeVar == "" {
+		scope = "*"
+		log.Debug("custom scope:" + scope)
+	}
+	repo := flags.RepoVar
 	aql := "items.find({\"repo\": {\"$match\":\"" + repo + "\"},\"path\":{\"$match\":\"@" + scope + "/*/@" + scope + "\"}}).include(\"repo\",\"name\",\"path\",\"type\")"
 
 	log.Debug("AQL query created:" + aql)
@@ -58,13 +62,15 @@ func main() {
 			paths := strings.Split(existingPath, "/")
 			correctPath := paths[0] + "/" + paths[1] + "/" + paths[2] + "/-/" + results.Result[result].Name
 			data, respCode, _, _ := auth.GetRestAPI("HEAD", true, flags.URLVar+"/artifactory/"+correctPath, flags.UsernameVar, flags.ApikeyVar, "", nil, nil, 0, flags, nil)
-			fmt.Println(string(data), respCode, correctPath)
+			log.Debug("checking if ", string(data), " exists via response code:", respCode, correctPath)
 			if respCode == 404 {
 				//attempt copy
-				query := "/api/copy/" + existingPath + "?to=/" + correctPath + "&dry=1"
-				fmt.Println(flags.URLVar + "/artifactory" + query)
+				query := "/api/copy/" + existingPath + "?to=/" + correctPath + "&dry=" + strconv.Itoa(flags.DryRunVar)
+				log.Debug(flags.URLVar + "/artifactory" + query)
 				data2, respCode2, _, _ := auth.GetRestAPI("POST", true, flags.URLVar+"/artifactory"+query, flags.UsernameVar, flags.ApikeyVar, "", nil, nil, 0, flags, nil)
-				fmt.Println(string(data2), respCode2)
+				log.Info(string(data2), respCode2)
+			} else {
+				log.Info(correctPath + " already exists, skipping")
 			}
 		}
 	}

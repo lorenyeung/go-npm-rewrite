@@ -104,10 +104,10 @@ func PrintDownloadPercent(done chan int64, path string, total int64) {
 
 //Flags struct
 type Flags struct {
-	WorkersVar, WorkerSleepVar, DuCheckVar, PkgLimitVar, SleepQueueMaxVar, HTTPSleepSecondsVar, HTTPRetryMaxVar                                                     int
-	StorageWarningVar, StorageThresholdVar                                                                                                                          float64
-	UsernameVar, ApikeyVar, URLVar, RepoVar, LogLevelVar, CredsFileVar, UpstreamUsernameVar, UpstreamApikeyVar, ForceTypeVar, PypiRegistryURLVar, PypiRepoSuffixVar string
-	ResetVar, ValuesVar, RandomVar, NpmMetadataVar, NpmRegistryOldVar                                                                                               bool
+	WorkersVar, WorkerSleepVar, HTTPSleepSecondsVar, HTTPRetryMaxVar, DryRunVar  int
+	StorageThresholdVar                                                          float64
+	UsernameVar, ApikeyVar, URLVar, RepoVar, LogLevelVar, CredsFileVar, ScopeVar string
+	ResetVar                                                                     bool
 }
 
 //LineCounter counts  how many lines are in a file
@@ -135,29 +135,22 @@ func SetFlags() Flags {
 	var flags Flags
 	flag.StringVar(&flags.LogLevelVar, "log", "INFO", "Order of Severity: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC")
 	flag.IntVar(&flags.WorkersVar, "workers", 50, "Number of workers")
-	flag.IntVar(&flags.PkgLimitVar, "pkglimit", 0, "Number of packages to download. Default unlimited")
-	flag.IntVar(&flags.SleepQueueMaxVar, "queuemax", 75, "Max queued size before sleeping")
 	flag.IntVar(&flags.WorkerSleepVar, "workersleep", 5, "Worker sleep period in seconds")
-	flag.IntVar(&flags.DuCheckVar, "ducheck", 5, "Disk Usage check in minutes")
 	flag.IntVar(&flags.HTTPSleepSecondsVar, "httpSleep", 10, "HTTP request sleep period before a retry")
 	flag.IntVar(&flags.HTTPRetryMaxVar, "retry", 5, "Retry attempt before failure")
-	flag.Float64Var(&flags.StorageWarningVar, "duwarn", 70, "Set Disk usage warning in %")
+	flag.IntVar(&flags.DryRunVar, "dryrun", 0, "dry run, set to 1 for true")
 	flag.Float64Var(&flags.StorageThresholdVar, "duthreshold", 85, "Set Disk usage threshold in %")
 	flag.StringVar(&flags.UsernameVar, "user", "", "Username")
 	flag.StringVar(&flags.ApikeyVar, "apikey", "", "API key or password")
-	flag.StringVar(&flags.UpstreamUsernameVar, "uuser", "", "Upstream Username")
-	flag.StringVar(&flags.UpstreamApikeyVar, "uapikey", "", "Upstream API key or password")
+
 	flag.StringVar(&flags.URLVar, "url", "", "Binary Manager URL")
-	flag.StringVar(&flags.RepoVar, "repo", "", "Download Repository")
-	flag.StringVar(&flags.PypiRegistryURLVar, "pypiregistryurl", "", "")
-	flag.StringVar(&flags.PypiRepoSuffixVar, "pypireposuffix", "", "")
+	flag.StringVar(&flags.RepoVar, "repo", "", "Repository")
+	flag.StringVar(&flags.ScopeVar, "scope", "", "Scope")
+
 	flag.BoolVar(&flags.ResetVar, "reset", false, "Reset creds file")
-	flag.BoolVar(&flags.ValuesVar, "values", false, "Output values")
-	flag.BoolVar(&flags.RandomVar, "random", false, "Attempt to pull packages in random queue order")
-	flag.BoolVar(&flags.NpmMetadataVar, "npmMD", false, "Only download NPM Metadata")
+
 	flag.StringVar(&flags.CredsFileVar, "credsfile", "", "File with creds. If there is more than one, it will pick randomly per request. Use whitespace to separate out user and password")
-	flag.StringVar(&flags.ForceTypeVar, "forcerepotype", "", "force repo type rather than get from repository")
-	flag.BoolVar(&flags.NpmRegistryOldVar, "npmold", false, "use file rather than API")
+
 	flag.Parse()
 	return flags
 }
