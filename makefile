@@ -2,7 +2,7 @@ GOOS=linux
 GOARCH=amd64
 VERSION := $(shell jq -r '.script_version' metadata.json)
 BINARY := $(shell jq -r '.binary_prefix' metadata.json)
-PROJECT=github.com/lorenyeung/go-orchestrate
+PROJECT=github.com/lorenyeung/go-npm-rewrite
 .PHONY: build
 
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
