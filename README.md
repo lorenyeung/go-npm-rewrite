@@ -1,18 +1,19 @@
 # go-npm-rewrite
 
 Required flags
-  -url string
+*  -url string
     	Binary Manager URL without/artifactory (http://repo.com/)
-  -apikey string
+*  -apikey string
     	API key or password
-  -repo string
+*  -repo string
     	Repository
-  -user string
+*  -user string
       Username to run the script with
+
 Optional flags
-  -scope string
+*  -scope string
     	Scope you want to of the packages you want to move. default is '*', otherwise you can set it
-  -log string
+*  -log string
       Log level
       
       
